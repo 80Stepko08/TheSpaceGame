@@ -10,7 +10,7 @@ function startGame() {
 }
 
 function endGame() {
-  alert("Game over!");
+	alert("Game over!");
 
   // Reset game keyboard
   myGameArea.keys = [];
@@ -38,6 +38,7 @@ function initGameLevel() {
 
     var _width = Math.random() * myGameArea.canvas.width;
     var _height = Math.random() * myGameArea.canvas.height;
+	var _angle = Math.random();
     var _meteor = new component(50, 50, "res/meteor.png", _width, _height, _speed_x, _speed_y, "meteor");
     meteors.push(_meteor);
 
@@ -53,7 +54,7 @@ function initGameLevel() {
 
   ship.trust = 0;
   ship.trustCoefficient = 1;
-  ship.energy = 1000;
+  ship.energy = 10000;
   ship.angle = 0;
   ship.speedX = 0;
   ship.speedY = 0;
@@ -92,15 +93,24 @@ var myGameArea = {
 
       // Change ship image
       this.isAnyKeyPressed = true;
-      ship.image.src = "res/ship_with_thrusters.png";
-    })
+	  if(ship.energy <= 10){
+		 ship.image.src = "res/ship_with_low_battery.png";  
+    } else{
+      if (e.keyCode == 40) {
+       ship.image.src = "res/ship_breaking.png";
+      } else{
+	  ship.image.src = "res/ship_with_thrusters.png";}
+  }	  ship.energy -= 10;
+})
     window.addEventListener('keyup', function (e) {
       myGameArea.keys[e.keyCode] = (e.type == "keydown");
 
       // Change ship image
-      if (!(myGameArea.keys[37] || myGameArea.keys[38] || myGameArea.keys[39] || myGameArea.keys[40])) {
+      if (!(myGameArea.keys[37] || myGameArea.keys[38] || myGameArea.keys[39] || myGameArea.keys[40] || ship.energy <= 10)) {
         ship.image.src = "res/ship.png";
       }
+	  else if(ship.energy <= 10)
+		 ship.image.src = "res/ship_with_low_battery.png"; 
     })
   },
   clear: function () {
@@ -162,7 +172,7 @@ function component(width, height, color, x, y, speed_x, speed_y, type) {
         // Ship bonus
         if (ship.trustCoefficient < 5) {
           ship.trustCoefficient *= 1.1;
-          ship.energy += 1000;
+          ship.energy += 10000;
           ship.level += 1;
         }
       }
@@ -314,7 +324,7 @@ function updateGameArea() {
 
     // Thruster backward
     if (myGameArea.keys[40]) {
-      ship.trust = -0.1;
+      ship.trust = -0.05;
     }
   }
 
@@ -323,8 +333,8 @@ function updateGameArea() {
   ship.update();
   ship.energy -= 1;
 
-  if (ship.energy < 0) {
-    endGame();
+  if (ship.energy <= 0) {
+	endGame();
   }
 
   // Update battery
